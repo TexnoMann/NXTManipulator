@@ -1,0 +1,7 @@
+#include "JointTaskHandler.nxc"
+
+task main(){
+  startMoveJoint_1();
+  
+  Wait(10000);
+}

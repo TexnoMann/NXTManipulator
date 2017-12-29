@@ -1,0 +1,93 @@
+
+
+#define motor OUT_B
+#define speed 0.05
+
+#define MOVE_P 4.0
+#define MOVE_I 0.04
+#define MOVE_D 10.0
+#define HOLD_P 2
+#define HOLD_I 0.02
+#define HOLD_D 8
+#define finalW  0.1
+#define finalP 100
+
+float deltaTimeControl=0.05;
+int basePower=0;
+int err1=0;
+int err2=0;
+byte handle;
+string fileindex ="goga.txt";
+
+
+
+void moveAngle(float finalAngle);
+int calcPower(float error, float P, float I, float D);
+int graphSpeed(float currentSpeed,float currentTime,float errorSpeed);
+
+
+task main() {
+  DeleteFile(fileindex);
+  CreateFile(fileindex, 4096*2, handle);
+  moveAngle(0.1);
+}
+
+void moveAngle(float finalAngle){
+  float firstAngle, secondAngle, firstErrorSpeed, secondErrorSpeed, firstSpeed,secondSpeed, firstErrorAngle, secondErrorAngle;
+  float iH,dH,pH,dt,iM,dM,pM;
+  int valueQ, valueS;
+  float time, timeSecond, timeFirst;
+
+
+
+  firstAngle = MotorRotationCount(motor)*PI/180;
+  secondAngle = firstAngle;
+  timeFirst=FirstTick();
+  timeSecond = CurrentTick()/1000.0;
+  dt = timeSecond - timeFirst;
+
+  secondErrorAngle=(finalAngle-secondAngle);
+  ResetRotationCount(motor);
+
+
+  while(true){
+    dt =  timeSecond- timeFirst;
+    timeFirst=timeSecond;
+
+
+    firstAngle= secondAngle;
+    secondAngle=MotorRotationCount(motor);
+
+
+    firstSpeed=secondErrorSpeed;
+    secondSpeed=secondAngle-firstAngle;
+
+    firstErrorSpeed=secondErrorSpeed;
+    secondErrorSpeed=finalW-secondSpeed;
+
+    pM=MOVE_P*secondErrorSpeed;
+    iM=iM+dt*MOVE_I*secondErrorSpeed;
+    dM=MOVE_D*(secondErrorSpeed-firstErrorSpeed)/dt;
+
+    valueS=(pM+iM+dM);
+    if(abs(valueS)>finalP) valueS=sign(valueS)*finalP;
+
+    NumOut(0,0,pM);
+    NumOut(0,12,pM);
+    NumOut(0,24,pM);
+    OnFwd(motor,valueS);
+    NumOut(50,50,dt);
+    graphSpeed(secondSpeed,timeSecond,valueS);
+    timeSecond = CurrentTick()/1000.0;
+
+
+    Wait(10);
+  }
+}
+
+
+int graphSpeed(float currentSpeed,float currentTime, float errorSpeed){
+    string scans=NumToStr(currentTime-FirstTick()/1000.0) + " " + NumToStr(currentSpeed)+" "+ NumToStr(errorSpeed);
+    int a=StrLen(scans);
+    WriteLnString(handle,scans,a);
+}

@@ -1,0 +1,46 @@
+#define MOVE_P 4f;
+#define MOVE_I 0.04f;
+#define MOVE_D 10f;
+#define HOLD_P 2f;
+#define HOLD_I 0.02f;
+#define HOLD_D 8
+#define motor OUT_B
+#define speed 0.1
+
+
+task main(){
+float radFirst, radSecond, error, errorSecond, speedFirst, speedSecond;
+float i,d,p, dt;
+float battery;
+int value;
+int time, timeSecond, timeFirst;
+
+
+
+radFirst = MotorRotationCount(motor) * PI / 180;
+radSecond = radFirst;
+timeFirst = CurrentTick()/1000;
+speedFirst = (radFirst - radSecond)/timeFirst;
+speedSecond = speedFirst;
+error = speedFirst - speedSecond;
+
+
+while(true){
+battery = BatteryLevel();
+radSecond = radFirst;
+radFirst = MotorRotationCount(motor) * PI / 180;
+timeSecond = timeFirst;
+timeFirst = CurrentTick()/1000;
+dt = timeFirst - timeSecond;
+errorSecond = error;
+speedSecond = speedFirst;
+speedFirst = (radFirst - radSecond)/dt;
+error =speed - speedFirst;
+p = error * MOVE_P;
+d = (error - errorSecond) * MOVE_D / dt;
+i = i + MOVE_KI*error*dt;
+value = (p+ d + i) * 100 / battery;
+OnFwd(motor,  value);
+}
+
+}

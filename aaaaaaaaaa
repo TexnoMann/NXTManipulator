@@ -1,0 +1,93 @@
+#define PS 3.0
+#define IS 50.0
+#define DS 0
+
+/*
+#define PS 3.63
+#define IS 50.3
+#define DS 0
+*/
+
+#define PD 50
+#define DD 5
+
+#define motor OUT_B
+#define desiredSpeed 2.0
+#define desiredAngle 1.0
+#define maxPower 100
+#define dt 30
+#define km 0.5082
+#define ke 0.5082
+#define G 0.1215
+#define ky 0.0742
+#define m 0.109
+#define lc 0.093
+#define g 9.8
+#define i 48
+#define startAngleJoin 23;
+
+task main(){
+  float firstAngle, secondAngle, firstErrorSpeed, secondErrorSpeed, firstSpeed, secondSpeed, firstErrorAngle,secondErrorAngle;
+
+  float pS,iS,dS,pD,iD,dD=0;
+  int valueS=0;
+  float valueD;
+  int N = 15;
+  long int time1 = 0;
+  //int control=0;
+  byte A;
+  string str, name = "HelloBitch.txt";
+  DeleteFile(name);
+  CreateFile(name, 4096, A);
+  ResetRotationCount(motor);
+  firstAngle = secondAngle = firstSpeed = secondErrorSpeed = secondErrorAngle = secondSpeed = 0;
+  long int lastTimeDetect=0;
+  int Mout;
+
+  while(true){
+    time1 = CurrentTick();
+    firstAngle = secondAngle;
+    secondAngle = MotorRotationCount(motor) * PI / 180.0;
+
+    /*
+    firstErrorAngle = secondErrorAngle;
+    secondErrorAngle = desiredAngle - firstAngle;
+
+    pD = secondErrorAngle * PD;
+    dD = (secondErrorAngle - firstErrorAngle) * DD / (dt/1000.0);
+    NumOut(0, 0, dD);
+    valueD = pD + dD;
+    if (abs(valueD) > desiredSpeed){valueD = sign(valueD)*desiredSpeed;}
+    //NumOut(20,20,valueD);
+//----------------------------------------------------------
+  */
+    firstSpeed = secondSpeed;
+    secondSpeed = (secondAngle - firstAngle)/(dt/1000.0);
+
+    firstErrorSpeed = secondErrorSpeed;
+    secondErrorSpeed =(desiredSpeed-secondSpeed);
+
+    pS = secondErrorSpeed * PS;
+    iS = iS + (firstErrorSpeed + secondErrorSpeed)/2.0*IS*(dt/1000.0);
+    dS = (secondErrorSpeed - firstErrorSpeed) * DS / (dt/1000.0);
+    valueS = pS + dS + iS;
+    Mout=m*g*Cos(secondAngle+startAngleJoin)*PI/180*lc / (i*km*G*ky);
+    valueS= valueS + Mout;
+    if (abs(valueS) > maxPower) valueS = sign(valueS)*maxPower;
+    NumOut(0,0,secondErrorSpeed);
+    NumOut(0,20,iS);
+    NumOut(0,40,dS);
+    NumOut(40,50,valueS);
+    str = NumToStr(secondSpeed) + " " + NumToStr(time1);
+
+    if((CurrentTick()-lastTimeDetect)>50){
+      lastTimeDetect=CurrentTick();
+      WriteLnString(A,str,N);
+    }
+
+    OnFwd(motor, valueS);
+
+    time1 = dt - (CurrentTick() - time1);
+    Wait(time1);
+  }
+}

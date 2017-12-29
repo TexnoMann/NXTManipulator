@@ -1,0 +1,82 @@
+#define PS 0.8
+#define IS 0.05
+#define DS 1.2
+
+#define PD 20
+#define ID 8
+#define DD 10
+
+
+
+
+int maxPower=100;
+float km=0.5082;
+float ke=0.5082;
+float G=0.1215;
+float ky=0.0742;
+//float m=0.109;
+//float lc[3]={0.093, 0.1, 0.1};
+float g=9.8;
+int i=48;
+
+long int time1 = 0;
+
+struct ManipulatorJoint{
+  float desiredSpeed;
+  int dt;
+  float desiredAngle;
+
+  float firstAngle, secondAngle, firstErrorSpeed, secondErrorSpeed, firstSpeed, secondSpeed, firstErrorAngle,secondErrorAngle;
+  byte currentMotor;
+  float pS,iS,dS,pD,iD,dD;
+  float lc;
+  int valueS;
+  float valueD;
+  float m;
+  float MOut;
+};
+
+
+void startJointPID(ManipulatorJoint & joint){
+
+  ResetRotationCount(joint.currentMotor);
+
+  while(abs(joint.secondAngle) < abs(joint.desiredAngle)){
+
+    time1 = CurrentTick();
+
+    joint.firstAngle = joint.secondAngle;
+    joint.secondAngle = MotorRotationCount(joint.currentMotor) * PI / 180.0;
+    joint.firstErrorAngle = joint.secondErrorAngle;
+    joint.secondErrorAngle = joint.desiredAngle - joint.firstAngle;
+
+    joint.pD= joint.secondErrorAngle * PD;
+    joint.dD = (joint.secondErrorAngle - joint.firstErrorAngle) * DD / (joint.dt*1.0/1000.0);
+    joint.valueD = joint.pD + joint.dD;
+    if (abs(joint.valueD) > joint.desiredSpeed) joint.valueD = sign(joint.valueD)*joint.desiredSpeed;
+    //-----------------------------------------------------joint
+    joint.firstSpeed = joint.secondSpeed;
+    joint.secondSpeed = (joint.secondAngle - joint.firstAngle)*1000.0/(joint.dt*1.0);
+
+    joint.firstErrorSpeed = joint.secondErrorSpeed;
+    joint.secondErrorSpeed =(joint.valueD - joint.secondSpeed);
+
+    joint.pS= joint.secondErrorSpeed * PS;
+    joint.dS = (joint.secondErrorSpeed - joint.firstErrorSpeed) * DS / joint.dt;
+    joint.iS = joint.iS + joint.secondErrorSpeed*IS*joint.dt;
+    joint.valueS = joint.pS + joint.dS + joint.iS;
+    if (joint.valueS > maxPower) joint.valueS = sign(joint.valueS)*maxPower;
+
+    joint.MOut=joint.m*g*cos(joint.secondAngle)*joint.lc;
+    joint.valueS= joint.valueS + joint.MOut/ (i*km*G*ky);
+
+    OnFwd(joint.currentMotor, joint.valueS);
+
+    time1 = joint.dt - (CurrentTick() - time1);
+    Wait(time1);
+  }
+}
+
+void stopJointPID(){
+
+}
