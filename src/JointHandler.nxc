@@ -1,0 +1,46 @@
+#include "JointState.nxc";
+#include "JointController.nxc";
+
+#define J1State state1
+#define J2State state2
+#define J3State state3
+
+#define J1Controll controll1
+#define J2Controll controll2
+#define J3Controll controll3
+
+mutex stateMutex;
+mutex controllerMutex;
+
+float getJointSpeed(JointState & _state);
+float getJointAngle(JointState & _state);
+void setJointSpeed(JointController & _controller,float _speed);
+void setJointAngle(JointController & _controller, float _angle);
+
+
+float getJointSpeed(JointState & _state){
+  Acquire(stateMutex);
+  float _speed = _state.currentSpeed;
+  Release(stateMutex);
+  return _speed;
+}
+
+float getJointAngle(JointState & _state){
+  Acquire(stateMutex);
+  float _angle = _state.currentAngle;
+  Release(stateMutex);
+  return _angle;
+}
+
+
+void setJointSpeed(JointController & _controller,float _speed){
+  Acquire(controllerMutex);
+  _controller.desiredSpeed=_speed;
+  Release(controllerMutex);
+}
+
+void setJointAngle(JointController & _controller, float _angle){
+  Acquire(controllerMutex);
+  _controller.desiredAngle=_angle;
+  Release(controllerMutex);
+}

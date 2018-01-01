@@ -1,0 +1,53 @@
+#define StandartUpdateTime 10
+
+struct JointState{
+  byte motorPort;
+  float currentSpeed;
+  float currentAngle;
+  float currentMOut;
+  int updateTime;
+};
+
+//=====================Global State three Joint=================================
+JointState state1;
+JointState state2;
+JointState state3;
+//==============================================================================
+
+task startStateDetectJoint1();
+task startStateDetectJoint2();
+task startStateDetectJoint3();
+void initialStateDetect(JointState & _state);
+void startMonitoring(JointState & _state);
+
+
+void initialStateDetect(JointState & _state){
+  if(_state.updateTime!=0) _state.updateTime=StandartUpdateTime;
+  _state.currentAngle=0.0;
+  _state.currentSpeed=0.0;
+  _state.currentSpeed=0.0;
+  if(_state == state1) StartTask(startStateDetectJoint1);
+  else if(_state == state2) StartTask(startStateDetectJoint2);
+  else if(_state == state3) StartTask(startStateDetectJoint3);
+}
+
+
+task startStateDetectJoint1(){
+  startMonitoring(state1);
+}
+
+void startMonitoring(JointState & _state){
+  float _firstAngle=0;
+  float _currentAngle=0;
+  float _currentSpeed=0;
+  ResetRotationCount(_state.motorPort);
+  while(true){
+    _firstAngle=_currentAngle;
+    _currentAngle=MotorRotationCount(_state.motorPort);
+    _currentAngle=_currentAngle*PI/180.0;
+    _currentSpeed=(_currentAngle - _firstAngle)/(_state.updateTime/1000.0);
+    _state.currentAngle=_currentAngle;
+    _state.currentSpeed=_currentSpeed;
+    Wait(_state.updateTime);
+  }
+}

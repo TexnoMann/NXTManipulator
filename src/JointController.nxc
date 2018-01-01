@@ -1,0 +1,13 @@
+struct JointController{
+  byte motorPort;
+  float desiredSpeed;
+  float desiredAngle;
+  bool power;
+  bool move;
+};
+
+//=====================Global State three Joint=================================
+JointController controll1;
+JointController controll2;
+JointController controll3;
+//==============================================================================
