@@ -9,8 +9,7 @@
 #define J2Controll controll2
 #define J3Controll controll3
 
-mutex stateMutex;
-mutex controllerMutex;
+
 
 float getJointSpeed(JointState & _state);
 float getJointAngle(JointState & _state);

@@ -1,5 +1,6 @@
 
 #define StandartUpdateTimeControll 15
+mutex controllerMutex;
 
 struct JointController{
   int updateTime;
