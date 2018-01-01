@@ -1,4 +1,4 @@
-#define StandartUpdateTime 10
+#define StandartUpdateTimeState 10
 
 struct JointState{
   byte motorPort;
@@ -22,7 +22,7 @@ void startMonitoring(JointState & _state);
 
 
 void initialStateDetect(JointState & _state){
-  if(_state.updateTime!=0) _state.updateTime=StandartUpdateTime;
+  if(_state.updateTime!=0) _state.updateTime=StandartUpdateTimeState;
   _state.currentAngle=0.0;
   _state.currentSpeed=0.0;
   _state.currentSpeed=0.0;
@@ -34,6 +34,12 @@ void initialStateDetect(JointState & _state){
 
 task startStateDetectJoint1(){
   startMonitoring(state1);
+}
+task startStateDetectJoint2(){
+  startMonitoring(state2);
+}
+task startStateDetectJoint3(){
+  startMonitoring(state3);
 }
 
 void startMonitoring(JointState & _state){

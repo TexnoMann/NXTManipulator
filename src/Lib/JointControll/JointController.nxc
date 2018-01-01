@@ -1,0 +1,47 @@
+
+#define StandartUpdateTimeControll 15
+
+struct JointController{
+  int updateTime;
+  byte motorPort;
+  float desiredSpeed;
+  float desiredAngle;
+  bool power;
+  bool move;
+};
+
+//=====================Global State three Joint=================================
+JointController controll1;
+JointController controll2;
+JointController controll3;
+//==============================================================================
+
+task startControllerJoint1();
+task startControllerJoint2();
+task startControllerJoint3();
+void initialController(JointController & _controller);
+void startController(JointController & _controller);
+
+
+void initialController(JointController & _controller){
+  if(_controller.updateTime!=0) _controller.updateTime=StandartUpdateTimeControll;
+
+  if(_controller == controll1) StartTask(startControllerJoint1);
+  else if(_controller == controll2) StartTask(startControllerJoint2);
+  else if(_controller == controll3) StartTask(startControllerJoint3);
+}
+
+
+task startControllerJoint1(){
+  startController(controll1);
+}
+task startControllerJoint2(){
+  startController(controll2);
+}
+task startControllerJoint3(){
+  startController(controll3);
+}
+
+void startController(JointController & _controller){
+
+}

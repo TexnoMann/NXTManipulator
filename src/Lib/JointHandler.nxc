@@ -1,5 +1,5 @@
-#include "JointState.nxc";
-#include "JointController.nxc";
+#include "JointState/JointState.nxc";
+#include "JointControll/JointController.nxc";
 
 #define J1State state1
 #define J2State state2

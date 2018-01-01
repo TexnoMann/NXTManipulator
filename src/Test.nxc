@@ -1,7 +1,7 @@
-#include "JointHandler.nxc";
+#include "Lib/JointHandler.nxc";
 
 task main(){
-   
+setJointSpeed(J1Controll,0.5);
 
   Wait(10000);
 }
