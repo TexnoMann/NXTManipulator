@@ -1,6 +1,8 @@
 #include "JointState/JointState.nxc";
 #include "JointControll/JointController.nxc";
 
+#define DeltaTimeHandler 10
+
 #define J1State state1
 #define J2State state2
 #define J3State state3
@@ -10,11 +12,15 @@
 #define J3Controll controll3
 
 
+task movingJoint1();
+task movingJoint2();
+task movingJoint3();
 
 float getJointSpeed(JointState & _state);
 float getJointAngle(JointState & _state);
 void setJointSpeed(JointController & _controller,float _speed);
 void setJointAngle(JointController & _controller, float _angle);
+void moveJointAngle(JointController & _controller, JointState & _state);
 
 
 float getJointSpeed(JointState & _state){
@@ -42,4 +48,36 @@ void setJointAngle(JointController & _controller, float _angle){
   Acquire(controllerMutex);
   _controller.desiredAngle=_angle;
   Release(controllerMutex);
+  if(_controller == J1Controll) StartTask(movingJoint1);
+  else if(_controller == J2Controll) StartTask(movingJoint2);
+  else if(_controller == J3Controll) StartTask(movingJoint3);
 }
+
+
+
+ void moveJointAngle(JointController & _controller,JointState & _state){
+  bool move=true;
+  while(move){
+    Acquire(stateMutex);
+    Acquire(controllerMutex);
+    move=(_controller.currentAngle!=_controller.desiredAngle);
+    _controller.currentAngle=_state.currentAngle;
+    _controller.currentSpeed=_state.currentSpeed;
+    Release(stateMutex);
+    Release(controllerMutex);
+    Wait(DeltaTimeHandler);
+  }
+}
+
+task movingJoint1(){
+  moveJointAngle(J1Controll,J1State);
+}
+
+task movingJoint2(){
+  moveJointAngle(J2Controll,J2State);
+}
+
+task movingJoint3(){
+  moveJointAngle(J3Controll,J3State);
+}
+
