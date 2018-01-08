@@ -46,6 +46,7 @@ void setJointSpeed(JointController & _controller,float _speed){
 
 void setJointAngle(JointController & _controller, float _angle){
   Acquire(controllerMutex);
+  _controller.move=true;
   _controller.desiredAngle=_angle;
   Release(controllerMutex);
   if(_controller == J1Controll) StartTask(movingJoint1);
