@@ -21,6 +21,7 @@ float getJointAngle(JointState & _state);
 void setJointSpeed(JointController & _controller,float _speed);
 void setJointAngle(JointController & _controller, float _angle);
 void moveJointAngle(JointController & _controller, JointState & _state);
+void waitJoint(JointController _controller);
 
 
 float getJointSpeed(JointState & _state){
@@ -46,7 +47,6 @@ void setJointSpeed(JointController & _controller,float _speed){
 
 void setJointAngle(JointController & _controller, float _angle){
   Acquire(controllerMutex);
-  _controller.move=true;
   _controller.desiredAngle=_angle;
   Release(controllerMutex);
   if(_controller == J1Controll) StartTask(movingJoint1);
@@ -57,6 +57,7 @@ void setJointAngle(JointController & _controller, float _angle){
 
 
  void moveJointAngle(JointController & _controller,JointState & _state){
+  _controller.move=true;
   bool move=true;
   while(move){
     Acquire(stateMutex);
@@ -68,6 +69,13 @@ void setJointAngle(JointController & _controller, float _angle){
     Release(controllerMutex);
     Wait(DeltaTimeHandler);
   }
+  _controller.move=false;
+
+}
+void waitJoint(JointController & _controller){
+  Acquire(controllerMutex);
+  while(_controller.move=true){}
+  Release(controllerMutex);
 }
 
 task movingJoint1(){

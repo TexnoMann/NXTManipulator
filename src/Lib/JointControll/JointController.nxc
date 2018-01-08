@@ -1,3 +1,4 @@
+#include "PIDReg.nxc"
 
 #define StandartUpdateTimeControll 15
 mutex controllerMutex;
@@ -13,6 +14,7 @@ struct JointController{
   float desiredAngle;
   bool power;
   bool move;
+  PIDState pidState;
 };
 
 //=====================Global State three Joint=================================
@@ -29,11 +31,11 @@ void startController(JointController & _controller);
 
 
 void initialController(JointController & _controller){
+
   _controller.desiredAngle=0;
   _controller.desiredSpeed=0;
   _controller.power=true;
-
-  if(_controller.updateTime!=0) _controller.updateTime=StandartUpdateTimeControll;
+  _controller.updateTime=StandartUpdateTimeControll;
 
   if(_controller == controll1) StartTask(startControllerJoint1);
   else if(_controller == controll2) StartTask(startControllerJoint2);
@@ -52,4 +54,12 @@ task startControllerJoint3(){
 }
 
 void startController(JointController & _controller){
+  bool move;
+  while(move){
+    Acquire(controllerMutex);
+    move=_controller.move;
+    PIDCalc(_controller.pidState);
+    Release(controllerMutex);
+  }
+
 }

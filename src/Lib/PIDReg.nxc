@@ -14,20 +14,7 @@ float g=9.8;
 
 long int time1 = 0;
 
-struct ManipulatorJoint{
-  float desiredSpeed;
-  int dt;
-  float desiredAngle;
-
-  float firstAngle, secondAngle, firstErrorSpeed, secondErrorSpeed, firstSpeed, secondSpeed, firstErrorAngle,secondErrorAngle;
-  byte currentMotor;
-  float pS,iS,dS,pD,iD,dD;
-  float lc;
-  int valueS;
-  float valueD;
-  float m;
-  float MOut;
-};
+void PIDCalc();
 
 
 

@@ -3,5 +3,6 @@
 task main(){
 setJointSpeed(J1Controll,0.5);
 setJointAngle(J1Controll,1);
-  Wait(10000);
+waitJoint(J1Controll);
+ Wait(10000);
 }
